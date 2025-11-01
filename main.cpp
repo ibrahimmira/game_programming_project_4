@@ -1,8 +1,8 @@
 #include "LevelA.h"
 
 // Global Constants
-constexpr int SCREEN_WIDTH     = 1000,
-              SCREEN_HEIGHT    = 600,
+constexpr int SCREEN_WIDTH     = 1100,
+              SCREEN_HEIGHT    = 800,
               FPS              = 120,
               NUMBER_OF_LEVELS = 2;
 
@@ -18,6 +18,7 @@ float gPreviousTicks   = 0.0f,
 Scene *gCurrentScene = nullptr;
 std::vector<Scene*> gLevels = {};
 
+LevelA *gLevelA = nullptr;
 
 // Function Declarations
 void switchToScene(Scene *scene);
@@ -36,7 +37,10 @@ void switchToScene(Scene *scene)
 void initialise()
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Scenes");
-    InitAudioDevice();
+
+    gLevelA = new LevelA(ORIGIN, "#b1eafaff");
+
+    gLevels.push_back(gLevelA);
 
     switchToScene(gLevels[0]);
 
@@ -45,6 +49,21 @@ void initialise()
 
 void processInput() 
 {
+    gCurrentScene->getState().chars->resetMovement();
+
+    if      (IsKeyDown(KEY_A)) gCurrentScene->getState().chars->moveLeft();
+    else if (IsKeyDown(KEY_D)) gCurrentScene->getState().chars->moveRight();
+
+    if (IsKeyPressed(KEY_W) && 
+        gCurrentScene->getState().chars->isCollidingBottom())
+    {
+        gCurrentScene->getState().chars->jump();
+        // PlaySound(gCurrentScene->getState().jumpSound);
+    }
+
+    if (GetLength(gCurrentScene->getState().chars->getMovement()) > 1.0f) 
+        gCurrentScene->getState().chars->normaliseMovement();
+
     if (IsKeyPressed(KEY_Q) || WindowShouldClose()) gAppStatus = TERMINATED;
 }
 
@@ -82,10 +101,9 @@ void render()
 
 void shutdown() 
 {
-
+    delete gLevelA;
     for (int i = 0; i < NUMBER_OF_LEVELS; i++) gLevels[i] = nullptr;
 
-    CloseAudioDevice();
     CloseWindow();
 }
 

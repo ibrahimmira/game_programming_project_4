@@ -6,9 +6,10 @@
 struct GameState
 {
     Map *map;
+    Entity *chars;
 
-    Music bgm;
-    Sound jumpSound;
+    // Music bgm;
+    // Sound jumpSound;
 
     Camera2D camera;
 
