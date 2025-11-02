@@ -41,3 +41,4 @@
 *.dwo
 
 raylib_app
+.DS_Store
