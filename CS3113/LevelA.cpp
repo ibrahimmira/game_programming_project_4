@@ -60,6 +60,39 @@ void LevelA::initialise()
    mGameState.camera.rotation = 0.0f;                            // no rotation
    mGameState.camera.zoom = 1.0f;                                // default zoom
   
+   /* 
+      ----------- ENEMY AI -----------
+   */
+
+   std::map<Direction, std::vector<int>> ghostAnimationAtlas = {
+         {DOWN,  { 0,   1,   2,    3 }},
+         {RIGHT, { 4,   5,   6,    7 }},
+         {UP,    { 8,   9,   10,   11 }},
+         {LEFT,  { 12,  13,  14,   15 }}
+    };
+
+    mGameState.enemy = new Entity(
+      {mOrigin.x, mOrigin.y}, // position
+      {100.0f * sizeRatio, 100.0f},             // scale
+      "assets/lightningsenemy.png",                   // texture file address
+      ATLAS,                                    // single image or atlas?
+      { 4, 9 },                                 // atlas dimensions
+      charsAnimationAtlas,                    // actual atlas
+      NPC                                    // entity type
+   );
+
+    mGameState.enemy->setAIType(WANDERER);
+    mGameState.enemy->setAIState(IDLE);
+    mGameState.enemy->setSpeed(Entity::DEFAULT_SPEED * 0.50f);
+
+    mGameState.enemy->setColliderDimensions({
+      mGameState.enemy->getScale().x / 3.0f,
+      mGameState.enemy->getScale().y / 1.1f
+   });
+
+    mGameState.enemy->setAcceleration({0.0f, ACCELERATION_OF_GRAVITY});
+    mGameState.enemy->setDirection(RIGHT);
+    mGameState.enemy->render();
 }
 
 void LevelA::update(float deltaTime)
@@ -74,7 +107,16 @@ void LevelA::update(float deltaTime)
       0               // col. entity count
    );
 
-   Vector2 currentPlayerPosition = { mGameState.chars->getPosition().x, mOrigin.y };
+   mGameState.enemy->update(
+      deltaTime,      // delta time / fixed timestep
+      mGameState.chars,        // player
+      mGameState.map, // map
+      nullptr,        // collidable entities
+      0               // col. entity count
+   );
+
+   // Vector2 currentPlayerPosition = { mGameState.chars->getPosition().x, mOrigin.y };
+   Vector2 currentPlayerPosition = mGameState.chars->getPosition();
 
    if (mGameState.chars->getPosition().y > 800.0f) mGameState.nextSceneID = 1;
 
@@ -88,10 +130,12 @@ void LevelA::render()
 
    mGameState.map->render();
    mGameState.chars->render();
+   mGameState.enemy->render();
 }
 
 void LevelA::shutdown()
 {
    delete mGameState.map;
    delete mGameState.chars;
+   delete mGameState.enemy;
 }

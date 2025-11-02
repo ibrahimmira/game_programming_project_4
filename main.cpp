@@ -1,8 +1,8 @@
 #include "LevelA.h"
 
 // Global Constants
-constexpr int SCREEN_WIDTH     = 1100,
-              SCREEN_HEIGHT    = 800,
+constexpr int SCREEN_WIDTH     = 1000,
+              SCREEN_HEIGHT    = 600,
               FPS              = 120,
               NUMBER_OF_LEVELS = 2;
 
