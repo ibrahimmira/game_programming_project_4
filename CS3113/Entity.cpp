@@ -53,12 +53,14 @@ void Entity::checkCollisionY(Entity *collidableEntities, int collisionCheckCount
             {
                 mPosition.y -= yOverlap;
                 mVelocity.y  = 0;
-                mIsCollidingBottom = true;
+                // mIsCollidingBottom = true;
+                mIsCollidingBottomEntity = true;
             } else if (mVelocity.y < 0) 
             {
                 mPosition.y += yOverlap;
                 mVelocity.y  = 0;
-                mIsCollidingTop = true;
+                // mIsCollidingTop = true;
+                mIsCollidingTopEntity = true;
 
                 if (collidableEntity->mEntityType == BLOCK)
                     collidableEntity->deactivate();
@@ -82,9 +84,16 @@ void Entity::checkCollisionX(Entity *collidableEntities, int collisionCheckCount
             // platform we're standing on from acting like a wall.
             float yDistance = fabs(mPosition.y - collidableEntity->mPosition.y);
             float yOverlap  = fabs(yDistance - (mColliderDimensions.y / 2.0f) - (collidableEntity->mColliderDimensions.y / 2.0f));
-
+            
+            // printf("I reached the before continue point in checkcollisionx entity\n");
             // Skip if barely touching vertically (standing on platform)
-            if (yOverlap < Y_COLLISION_THRESHOLD) continue;
+            // if (yOverlap < Y_COLLISION_THRESHOLD) continue;
+            if (yOverlap < Y_COLLISION_THRESHOLD) {
+                if (mPosition.x > collidableEntity->mPosition.x) mIsCollidingLeftEntity = true;
+                else                                             mIsCollidingRightEntity = true;
+                continue;
+            };
+            //printf("I reached the after continue point in checkcollisionx entity\n");
 
             float xDistance = fabs(mPosition.x - collidableEntity->mPosition.x);
             float xOverlap  = fabs(xDistance - (mColliderDimensions.x / 2.0f) - (collidableEntity->mColliderDimensions.x / 2.0f));
@@ -94,13 +103,16 @@ void Entity::checkCollisionX(Entity *collidableEntities, int collisionCheckCount
                 mVelocity.x      = 0;
 
                 // Collision!
-                mIsCollidingRight = true;
+                // mIsCollidingRight = true;
+                // printf("I reached the flag setting point in checkcollisionx entity\n");
+                mIsCollidingRightEntity = true;
             } else if (mVelocity.x < 0) {
                 mPosition.x    += xOverlap;
                 mVelocity.x     = 0;
  
                 // Collision!
-                mIsCollidingLeft = true;
+                // mIsCollidingLeft = true;
+                mIsCollidingLeftEntity = true;
             }
         }
     }
@@ -210,12 +222,20 @@ void Entity::AIWander() {
     else if (mDirection == LEFT) moveLeft();
     else if (mDirection == RIGHT) moveRight();  
 
-    if (mIsCollidingLeft) {
+    // if (mIsCollidingLeft) {
+    //     moveRight();
+    // }
+    // else if (mIsCollidingRight) {
+    //     moveLeft();
+    // }
+
+    if (mIsCollidingLeftEntity || mIsCollidingLeft) {
         moveRight();
     }
-    else if (mIsCollidingRight) {
+    else if (mIsCollidingRightEntity || mIsCollidingRight) {
         moveLeft();
     }
+    
    
 }
 
@@ -343,7 +363,7 @@ void Entity::render()
         mAngle, WHITE
     );
 
-    // displayCollider();
+    displayCollider();
 }
 
 void Entity::displayCollider() 

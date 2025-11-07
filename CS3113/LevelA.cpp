@@ -25,37 +25,38 @@ void LevelA::initialise()
       ----------- PROTAGONIST -----------
    */
 
-   std::map<Direction, std::vector<int>> charsAnimationAtlas = {
-      { DOWN,     { 18, 19, 20, 21, 22, 23, 24, 25, 26 } },
-      { UP,       {  0,  1,  2,  3,  4,  5, 6, 7, 8 } },
-      { RIGHT,    { 27, 28, 29, 30, 31, 32, 33, 34, 35 } },
-      { LEFT,     {  9,  10, 11, 12, 13, 14, 15, 16, 17 } }
+   std::map<Direction, std::vector<int>> AnimationAtlas = {
+      { DOWN,     {  9,  10, 11, 12, 13, 14, 15, 16, 17 } },
+      { UP,       {  27, 28, 29, 30, 31, 32, 33, 34, 35 } },
+      { RIGHT,    {  0,  1,  2,  3,  4,  5, 6, 7, 8} },
+      { LEFT,     {  18, 19, 20, 21, 22, 23, 24, 25, 26 } }
    };
+   
+   float sizeRatio  = 36.0f / 55.0f;
 
-   float sizeRatio  = 1.0f;
-
-   mGameState.chars = new Entity(
+   mGameState.hero = new Entity(
       {mOrigin.x, mOrigin.y}, // position
-      {100.0f * sizeRatio, 100.0f},             // scale
+      {85.0f * sizeRatio, 85.0f},             // scale
       "assets/lightning.png",                   // texture file address
       ATLAS,                                    // single image or atlas?
       { 4, 9 },                                 // atlas dimensions
-      charsAnimationAtlas,                    // actual atlas
+      AnimationAtlas,                    // actual atlas
       PLAYER                                    // entity type
    );
 
-   mGameState.chars->setJumpingPower(550.0f);
-   mGameState.chars->setColliderDimensions({
-      mGameState.chars->getScale().x / 3.0f,
-      mGameState.chars->getScale().y / 1.1f
+   mGameState.hero->setJumpingPower(550.0f);
+   mGameState.hero->setColliderDimensions({
+      mGameState.hero->getScale().x / 1.5f,
+      mGameState.hero->getScale().y / 1.2f
    });
-   mGameState.chars->setAcceleration({0.0f, ACCELERATION_OF_GRAVITY});
+
+   mGameState.hero->setAcceleration({0.0f, ACCELERATION_OF_GRAVITY});
 
    /*
       ----------- CAMERA -----------
    */
    mGameState.camera = { 0 };                                    // zero initialize
-   mGameState.camera.target = mGameState.chars->getPosition(); // camera follows player
+   mGameState.camera.target = mGameState.hero->getPosition(); // camera follows player
    mGameState.camera.offset = mOrigin;                           // camera offset to center of screen
    mGameState.camera.rotation = 0.0f;                            // no rotation
    mGameState.camera.zoom = 1.0f;                                // default zoom
@@ -64,61 +65,69 @@ void LevelA::initialise()
       ----------- ENEMY AI -----------
    */
 
-   std::map<Direction, std::vector<int>> ghostAnimationAtlas = {
-         {DOWN,  { 0,   1,   2,    3 }},
-         {RIGHT, { 4,   5,   6,    7 }},
-         {UP,    { 8,   9,   10,   11 }},
-         {LEFT,  { 12,  13,  14,   15 }}
-    };
-
-    mGameState.enemy = new Entity(
-      {mOrigin.x, mOrigin.y}, // position
-      {100.0f * sizeRatio, 100.0f},             // scale
-      "assets/lightningsenemy.png",                   // texture file address
+    mGameState.enemyA = new Entity(
+      {mOrigin.x - 200, mOrigin.y}, // position
+      {85.0f * sizeRatio, 85.0f},             // scale
+      "assets/lightnings_enemy1.png",                   // texture file address
       ATLAS,                                    // single image or atlas?
       { 4, 9 },                                 // atlas dimensions
-      charsAnimationAtlas,                    // actual atlas
+      AnimationAtlas,                    // actual atlas
       NPC                                    // entity type
    );
 
-    mGameState.enemy->setAIType(WANDERER);
-    mGameState.enemy->setAIState(IDLE);
-    mGameState.enemy->setSpeed(Entity::DEFAULT_SPEED * 0.50f);
+    mGameState.enemyA->setAIType(WANDERER);
+    mGameState.enemyA->setAIState(IDLE);
+    mGameState.enemyA->setSpeed(Entity::DEFAULT_SPEED * 0.50f);
 
-    mGameState.enemy->setColliderDimensions({
-      mGameState.enemy->getScale().x / 3.0f,
-      mGameState.enemy->getScale().y / 1.1f
+    mGameState.enemyA->setColliderDimensions({
+      mGameState.enemyA->getScale().x / 1.5f,
+      mGameState.enemyA->getScale().y / 1.2f
    });
 
-    mGameState.enemy->setAcceleration({0.0f, ACCELERATION_OF_GRAVITY});
-    mGameState.enemy->setDirection(RIGHT);
-    mGameState.enemy->render();
+    mGameState.enemyA->setAcceleration({0.0f, ACCELERATION_OF_GRAVITY});
+    mGameState.enemyA->setDirection(RIGHT);
+    mGameState.enemyA->render();
 }
 
 void LevelA::update(float deltaTime)
 {
    // UpdateMusicStream(mGameState.bgm);
 
-   mGameState.chars->update(
+   mGameState.hero->update(
       deltaTime,      // delta time / fixed timestep
       nullptr,        // player
       mGameState.map, // map
-      nullptr,        // collidable entities
-      0               // col. entity count
+      mGameState.enemyA,        // collidable entities
+      1               // col. entity count
    );
 
-   mGameState.enemy->update(
+   mGameState.enemyA->update(
       deltaTime,      // delta time / fixed timestep
-      mGameState.chars,        // player
+      mGameState.hero,        // player
       mGameState.map, // map
-      nullptr,        // collidable entities
-      0               // col. entity count
+      mGameState.hero,        // collidable entities
+      1               // col. entity count
    );
+
+   mGameState.damageCooldown = fmaxf(0.0f, mGameState.damageCooldown - deltaTime);
+
+   bool attacked = mGameState.hero->isAttackedbyAI(mGameState.enemyA);
+
+   if (attacked && mGameState.damageCooldown <= 0.0f) {
+      mGameState.livesRemaining--;
+      mGameState.damageCooldown = 1.0f;
+      mGameState.nextSceneID = 1;
+   }
+
+   bool defeatedEnemy = mGameState.hero->isCollidingBottomEntity();
+   if (defeatedEnemy && mGameState.damageCooldown <= 0.0f) {
+      mGameState.enemyA->deactivate();
+   }
 
    // Vector2 currentPlayerPosition = { mGameState.chars->getPosition().x, mOrigin.y };
-   Vector2 currentPlayerPosition = mGameState.chars->getPosition();
+   Vector2 currentPlayerPosition = mGameState.hero->getPosition();
 
-   if (mGameState.chars->getPosition().y > 800.0f) mGameState.nextSceneID = 1;
+   if (mGameState.hero->getPosition().y > 800.0f) mGameState.nextSceneID = 1;
 
    panCamera(&mGameState.camera, &currentPlayerPosition);
   
@@ -128,14 +137,15 @@ void LevelA::render()
 {
    ClearBackground(ColorFromHex(mBGColourHexCode));
 
+   
    mGameState.map->render();
-   mGameState.chars->render();
-   mGameState.enemy->render();
+   mGameState.hero->render();
+   mGameState.enemyA->render();
 }
 
 void LevelA::shutdown()
 {
    delete mGameState.map;
-   delete mGameState.chars;
-   delete mGameState.enemy;
+   delete mGameState.hero;
+   delete mGameState.enemyA;
 }

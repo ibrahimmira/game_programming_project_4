@@ -19,6 +19,7 @@ Scene *gCurrentScene = nullptr;
 std::vector<Scene*> gLevels = {};
 
 LevelA *gLevelA = nullptr;
+Menu *gMenuScreen = nullptr;
 
 // Function Declarations
 void switchToScene(Scene *scene);
@@ -38,32 +39,52 @@ void initialise()
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Scenes");
 
+    gMenuScreen = new Menu(ORIGIN,"#000000ff");
+
+    //printf("I reached post menu init !!!!!!!!\n");
+
     gLevelA = new LevelA(ORIGIN, "#b1eafaff");
 
+    gLevels.push_back(gMenuScreen);
     gLevels.push_back(gLevelA);
+
+    //printf("I reached most menu push back!!!!!!!!\n");
 
     switchToScene(gLevels[0]);
 
+    //printf("I reached post switchtoscene!!!!!!!!\n");
+
     SetTargetFPS(FPS);
+
+    //printf("I reached post settargetfps!!!!!!!\n");
 }
 
 void processInput() 
 {
-    gCurrentScene->getState().chars->resetMovement();
+    // printf("I reached process input!!!!!!!!");
 
-    if      (IsKeyDown(KEY_A)) gCurrentScene->getState().chars->moveLeft();
-    else if (IsKeyDown(KEY_D)) gCurrentScene->getState().chars->moveRight();
+    // if (IsKeyPressed(KEY_ENTER)) gMenuScreen->
+    if (gCurrentScene == gMenuScreen) {
 
-    if (IsKeyPressed(KEY_W) && 
-        gCurrentScene->getState().chars->isCollidingBottom())
-    {
-        gCurrentScene->getState().chars->jump();
-        // PlaySound(gCurrentScene->getState().jumpSound);
+        if (IsKeyPressed(KEY_ENTER)) gMenuScreen->setGameCondition();
     }
+    if (gCurrentScene != gMenuScreen) {
+        gCurrentScene->getState().chars->resetMovement();
 
-    if (GetLength(gCurrentScene->getState().chars->getMovement()) > 1.0f) 
-        gCurrentScene->getState().chars->normaliseMovement();
+        
+        if      (IsKeyDown(KEY_A)) gCurrentScene->getState().chars->moveLeft();
+        else if (IsKeyDown(KEY_D)) gCurrentScene->getState().chars->moveRight();
 
+        if (IsKeyPressed(KEY_W) && 
+            gCurrentScene->getState().chars->isCollidingBottom())
+        {
+            gCurrentScene->getState().chars->jump();
+            // PlaySound(gCurrentScene->getState().jumpSound);
+        }
+
+        if (GetLength(gCurrentScene->getState().chars->getMovement()) > 1.0f) 
+            gCurrentScene->getState().chars->normaliseMovement();
+    }
     if (IsKeyPressed(KEY_Q) || WindowShouldClose()) gAppStatus = TERMINATED;
 }
 
@@ -91,16 +112,20 @@ void update()
 void render()
 {
     BeginDrawing();
-    BeginMode2D(gCurrentScene->getState().camera);
+    BeginMode2D (gCurrentScene->getState().camera);
 
     gCurrentScene->render();
 
     EndMode2D();
+    if (gCurrentScene != gMenuScreen){
+    DrawText(TextFormat("Lives Left: %d", gCurrentScene->getState().livesRemaining), 25, 25, 20, RED);
+    }
     EndDrawing();
 }
 
 void shutdown() 
 {
+    delete gMenuScreen;
     delete gLevelA;
     for (int i = 0; i < NUMBER_OF_LEVELS; i++) gLevels[i] = nullptr;
 

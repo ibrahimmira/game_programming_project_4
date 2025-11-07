@@ -6,8 +6,10 @@
 struct GameState
 {
     Map *map;
-    Entity *chars;
-    Entity *enemy;
+    Entity *hero;
+    Entity *enemyA;
+    Entity *enemyB;
+    Entity *enemyC;
 
     // Music bgm;
     // Sound jumpSound;
@@ -15,6 +17,8 @@ struct GameState
     Camera2D camera;
 
     int nextSceneID;
+    int livesRemaining = 3;
+    float damageCooldown = 0.0f;
 };
 
 class Scene 

@@ -43,6 +43,11 @@ private:
     bool mIsCollidingRight  = false;
     bool mIsCollidingLeft   = false;
 
+    bool mIsCollidingTopEntity    = false;
+    bool mIsCollidingBottomEntity = false;
+    bool mIsCollidingRightEntity  = false;
+    bool mIsCollidingLeftEntity   = false;
+
     EntityStatus mEntityStatus = ACTIVE;
     EntityType   mEntityType;
 
@@ -63,6 +68,11 @@ private:
         mIsCollidingBottom = false;
         mIsCollidingRight  = false;
         mIsCollidingLeft   = false;
+
+        mIsCollidingBottomEntity = false;
+        mIsCollidingLeftEntity = false;
+        mIsCollidingRightEntity = false;
+        mIsCollidingTopEntity = false;
     }
 
     void animate(float deltaTime);
@@ -75,6 +85,7 @@ public:
     static constexpr int   DEFAULT_SPEED         = 200;
     static constexpr int   DEFAULT_FRAME_SPEED   = 14;
     static constexpr float Y_COLLISION_THRESHOLD = 0.5f;
+
 
     Entity();
     Entity(Vector2 position, Vector2 scale, const char *textureFilepath, 
@@ -126,6 +137,21 @@ public:
     
     bool isCollidingTop()    const { return mIsCollidingTop;    }
     bool isCollidingBottom() const { return mIsCollidingBottom; }
+    bool isCollidingLeft()   const { return mIsCollidingLeft; }
+    bool isCollidingRight()   const { return mIsCollidingRight; }
+
+    bool isCollidingTopEntity()    const { return mIsCollidingTopEntity;    }
+    bool isCollidingBottomEntity() const { return mIsCollidingBottomEntity; }
+    bool isCollidingLeftEntity()   const { return mIsCollidingLeftEntity; }
+    bool isCollidingRightEntity()   const { return mIsCollidingRightEntity; }
+
+    bool isAttackedbyAI(Entity *enemy ) const {
+
+        bool gotAttacked = mIsCollidingLeftEntity || mIsCollidingRightEntity ||
+                           enemy->isCollidingLeftEntity() || enemy->isCollidingRightEntity();
+        
+        return gotAttacked;
+    }
 
     std::map<Direction, std::vector<int>> getAnimationAtlas() const { return mAnimationAtlas; }
 
