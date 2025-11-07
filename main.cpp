@@ -1,4 +1,4 @@
-#include "LevelA.h"
+#include "LevelB.h"
 
 // Global Constants
 constexpr int SCREEN_WIDTH     = 1000,
@@ -19,6 +19,7 @@ Scene *gCurrentScene = nullptr;
 std::vector<Scene*> gLevels = {};
 
 LevelA *gLevelA = nullptr;
+LevelB *gLevelB = nullptr;
 Menu *gMenuScreen = nullptr;
 
 // Function Declarations
@@ -44,9 +45,11 @@ void initialise()
     //printf("I reached post menu init !!!!!!!!\n");
 
     gLevelA = new LevelA(ORIGIN, "#b1eafaff");
+    gLevelB = new LevelB(ORIGIN, "#ffddb3ff");
 
     gLevels.push_back(gMenuScreen);
     gLevels.push_back(gLevelA);
+    gLevels.push_back(gLevelB);
 
     //printf("I reached most menu push back!!!!!!!!\n");
 

@@ -1,11 +1,11 @@
-#include "LevelA.h"
+#include "LevelB.h"
 
-LevelA::LevelA()                                      : Scene { {0.0f}, nullptr   } {}
-LevelA::LevelA(Vector2 origin, const char *bgHexCode) : Scene { origin, bgHexCode } {}
+LevelB::LevelB()                                      : Scene { {0.0f}, nullptr   } {}
+LevelB::LevelB(Vector2 origin, const char *bgHexCode) : Scene { origin, bgHexCode } {}
 
-LevelA::~LevelA() { shutdown(); }
+LevelB::~LevelB() { shutdown(); }
 
-void LevelA::initialise()
+void LevelB::initialise()
 {
    mGameState.nextSceneID = -1;
 
@@ -99,7 +99,7 @@ void LevelA::initialise()
     mGameState.enemyA->render();
 }
 
-void LevelA::update(float deltaTime)
+void LevelB::update(float deltaTime)
 {
    // UpdateMusicStream(mGameState.bgm);
    if (!mGameState.displayLoserMessage) {
@@ -167,7 +167,7 @@ void LevelA::update(float deltaTime)
   
 }
 
-void LevelA::render()
+void LevelB::render()
 {
    ClearBackground(ColorFromHex(mBGColourHexCode));
 
@@ -182,7 +182,7 @@ void LevelA::render()
 }
 
 
-void LevelA::shutdown()
+void LevelB::shutdown()
 {
    delete mGameState.map;
    delete mGameState.hero;
