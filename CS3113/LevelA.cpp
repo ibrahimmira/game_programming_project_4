@@ -21,6 +21,23 @@ void LevelA::initialise()
       mOrigin                      // in-game origin
    );
 
+   // gold = new Entity(
+   //    {mGameState.map->getLeftBoundary() + TILE_DIMENSION / 2 , mOrigin.y - TILE_DIMENSION},
+   //    { TILE_DIMENSION, TILE_DIMENSION },
+   //    "assets/gold.png",
+   //    BLOCK
+   // );
+
+    /*
+      ----------- GOLD -----------
+   */
+   gold = new Entity(
+      {mOrigin.x, mGameState.map->getBottomBoundary() - 3 * (TILE_DIMENSION / 2)},
+      { TILE_DIMENSION, TILE_DIMENSION },
+      "assets/gold.png",
+      BLOCK
+   );
+
    /*
       ----------- PROTAGONIST -----------
    */
@@ -94,21 +111,29 @@ void LevelA::update(float deltaTime)
    // UpdateMusicStream(mGameState.bgm);
    if (!mGameState.displayLoserMessage) {
       
+      Entity* heroCollidableEntities[] = {mGameState.enemyA, gold};
+      Entity* enemyCollidableEntities[] = {mGameState.hero};
+
       mGameState.hero->update(
          deltaTime,      // delta time / fixed timestep
          nullptr,        // player
          mGameState.map, // map
-         mGameState.enemyA,        // collidable entities
-         1               // col. entity count
+         heroCollidableEntities,        // collidable entities
+         2               // col. entity count
       );
 
       mGameState.enemyA->update(
          deltaTime,      // delta time / fixed timestep
          mGameState.hero,        // player
          mGameState.map, // map
-         mGameState.hero,        // collidable entities
+         enemyCollidableEntities,        // collidable entities
          1               // col. entity count
       );
+
+      if (mGameState.hero->isCollidingBLOCK()) {
+         mGameState.nextSceneID = 2;
+         return;
+      } 
 
       mGameState.damageCooldown = fmaxf(0.0f, mGameState.damageCooldown - deltaTime);
 
@@ -120,14 +145,17 @@ void LevelA::update(float deltaTime)
          mGameState.nextSceneID = 1;
       }
 
-      bool defeatedEnemy = mGameState.hero->isCollidingBottomEntity();
+      bool defeatedEnemy = mGameState.hero->isCollidingBottomAI();
       if (defeatedEnemy && mGameState.damageCooldown <= 0.0f) {
          mGameState.enemyA->deactivate();
       }
 
       Vector2 currentPlayerPosition = mGameState.hero->getPosition();
 
-      if (mGameState.hero->getPosition().y > 800.0f) mGameState.nextSceneID = 1;
+      if (mGameState.hero->getPosition().y > 800.0f) {
+         mGameState.nextSceneID = 1;
+         mGameState.livesRemaining--;
+      } 
 
       panCamera(&mGameState.camera, &currentPlayerPosition);
    }
@@ -153,6 +181,7 @@ void LevelA::render()
    mGameState.map->render();
    mGameState.hero->render();
    mGameState.enemyA->render();
+   gold->render();
 
    if (mGameState.displayLoserMessage) {
     DrawText("You Lose!", mOrigin.x - 80, mOrigin.y, 40, RED);
@@ -165,4 +194,5 @@ void LevelA::shutdown()
    delete mGameState.map;
    delete mGameState.hero;
    delete mGameState.enemyA;
+   delete gold;
 }

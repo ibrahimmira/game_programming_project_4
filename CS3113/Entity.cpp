@@ -31,86 +31,131 @@ Entity::Entity(Vector2 position, Vector2 scale, const char *textureFilepath,
 
 Entity::~Entity() { UnloadTexture(mTexture); };
 
-void Entity::checkCollisionY(Entity *collidableEntities, int collisionCheckCount)
+void Entity::checkCollisionY(Entity **collidableEntities, int collisionCheckCount)
 {
     for (int i = 0; i < collisionCheckCount; i++)
     {
         // STEP 1: For every entity that our player can collide with...
-        Entity *collidableEntity = &collidableEntities[i];
-        
-        if (isColliding(collidableEntity))
-        {
-            // STEP 2: Calculate the distance between its centre and our centre
-            //         and use that to calculate the amount of overlap between
-            //         both bodies.
-            float yDistance = fabs(mPosition.y - collidableEntity->mPosition.y);
-            float yOverlap  = fabs(yDistance - (mColliderDimensions.y / 2.0f) - 
-                              (collidableEntity->mColliderDimensions.y / 2.0f));
-            
-            // STEP 3: "Unclip" ourselves from the other entity, and zero our
-            //         vertical velocity.
-            if (mVelocity.y > 0) 
-            {
-                mPosition.y -= yOverlap;
-                mVelocity.y  = 0;
-                // mIsCollidingBottom = true;
-                mIsCollidingBottomEntity = true;
-            } else if (mVelocity.y < 0) 
-            {
-                mPosition.y += yOverlap;
-                mVelocity.y  = 0;
-                // mIsCollidingTop = true;
-                mIsCollidingTopEntity = true;
+        Entity *collidableEntity = collidableEntities[i];
+        if (collidableEntity == nullptr) continue;
+        if (isColliding(collidableEntity)){
+                if (collidableEntity->mEntityType == BLOCK) {
+                    float yDistance = fabs(mPosition.y - collidableEntity->mPosition.y);
+                    float yOverlap  = fabs(yDistance - (mColliderDimensions.y / 2.0f) - 
+                                    (collidableEntity->mColliderDimensions.y / 2.0f));
 
-                if (collidableEntity->mEntityType == BLOCK)
-                    collidableEntity->deactivate();
+                    if (mVelocity.y > 0) 
+                    {
+                        mPosition.y -= yOverlap;
+                        mVelocity.y  = 0;
+                        mIsCollidingBottomBLOCK = true;
+                    } else if (mVelocity.y < 0) 
+                    {
+                        mPosition.y += yOverlap;
+                        mVelocity.y  = 0;
+                        mIsCollidingTopBLOCK = true;
+
+                    if (collidableEntity->mEntityType == BLOCK)
+                            collidableEntity->deactivate();
+                    }
+                }
+                
+            else 
+            {
+                // STEP 2: Calculate the distance between its centre and our centre
+                //         and use that to calculate the amount of overlap between
+                //         both bodies.
+                float yDistance = fabs(mPosition.y - collidableEntity->mPosition.y);
+                float yOverlap  = fabs(yDistance - (mColliderDimensions.y / 2.0f) - 
+                                (collidableEntity->mColliderDimensions.y / 2.0f));
+                
+                // STEP 3: "Unclip" ourselves from the other entity, and zero our
+                //         vertical velocity.
+                if (mVelocity.y > 0) 
+                {
+                    mPosition.y -= yOverlap;
+                    mVelocity.y  = 0;
+                    mIsCollidingBottom = true;
+                    mIsCollidingBottomAI = true;
+                } else if (mVelocity.y < 0) 
+                {
+                    mPosition.y += yOverlap;
+                    mVelocity.y  = 0;
+                    mIsCollidingTop = true;
+                    mIsCollidingTopAI = true;
+
+                    if (collidableEntity->mEntityType == BLOCK)
+                        collidableEntity->deactivate();
+                }
             }
-        }
+    }
     }
 }
 
-void Entity::checkCollisionX(Entity *collidableEntities, int collisionCheckCount)
+void Entity::checkCollisionX(Entity **collidableEntities, int collisionCheckCount)
 {
     for (int i = 0; i < collisionCheckCount; i++)
     {
-        Entity *collidableEntity = &collidableEntities[i];
-        
+        Entity *collidableEntity = collidableEntities[i];
+        if (collidableEntity == nullptr) continue;
         if (isColliding(collidableEntity))
-        {            
-            // When standing on a platform, we're always slightly overlapping
-            // it vertically due to gravity, which causes false horizontal
-            // collision detections. So the solution I dound is only resolve X
-            // collisions if there's significant Y overlap, preventing the 
-            // platform we're standing on from acting like a wall.
-            float yDistance = fabs(mPosition.y - collidableEntity->mPosition.y);
-            float yOverlap  = fabs(yDistance - (mColliderDimensions.y / 2.0f) - (collidableEntity->mColliderDimensions.y / 2.0f));
-            
-            // Skip if barely touching vertically (standing on platform)
-            // if (yOverlap < Y_COLLISION_THRESHOLD) continue;
-            if (yOverlap < Y_COLLISION_THRESHOLD) {
-                if (mPosition.x > collidableEntity->mPosition.x) mIsCollidingLeftEntity = true;
-                else                                             mIsCollidingRightEntity = true;
-                continue;
-            };
+        {    
+            if (collidableEntity->mEntityType == BLOCK) {
+                    float yDistance = fabs(mPosition.y - collidableEntity->mPosition.y);
+                    float yOverlap  = fabs(yDistance - (mColliderDimensions.y / 2.0f) - 
+                                    (collidableEntity->mColliderDimensions.y / 2.0f));
 
-            float xDistance = fabs(mPosition.x - collidableEntity->mPosition.x);
-            float xOverlap  = fabs(xDistance - (mColliderDimensions.x / 2.0f) - (collidableEntity->mColliderDimensions.x / 2.0f));
+                    if (mVelocity.y > 0) 
+                    {
+                        mPosition.y -= yOverlap;
+                        mVelocity.y  = 0;
+                        mIsCollidingBottomBLOCK = true;
+                    } else if (mVelocity.y < 0) 
+                    {
+                        mPosition.y += yOverlap;
+                        mVelocity.y  = 0;
+                        mIsCollidingTopBLOCK = true;
 
-            if (mVelocity.x > 0) {
-                mPosition.x     -= xOverlap;
-                mVelocity.x      = 0;
+                    if (collidableEntity->mEntityType == BLOCK)
+                            collidableEntity->deactivate();
+                    }
+                }
+            else {
+                // When standing on a platform, we're always slightly overlapping
+                // it vertically due to gravity, which causes false horizontal
+                // collision detections. So the solution I dound is only resolve X
+                // collisions if there's significant Y overlap, preventing the 
+                // platform we're standing on from acting like a wall.
+                float yDistance = fabs(mPosition.y - collidableEntity->mPosition.y);
+                float yOverlap  = fabs(yDistance - (mColliderDimensions.y / 2.0f) - (collidableEntity->mColliderDimensions.y / 2.0f));
+                
+                // Skip if barely touching vertically (standing on platform)
+                // if (yOverlap < Y_COLLISION_THRESHOLD) continue;
+                if (yOverlap < Y_COLLISION_THRESHOLD) {
+                    if (mPosition.x > collidableEntity->mPosition.x) mIsCollidingLeftAI = true;
+                    else                                             mIsCollidingRightAI = true;
+                    continue;
+                };
 
-                // Collision!
-                // mIsCollidingRight = true;
-                mIsCollidingRightEntity = true;
-            } else if (mVelocity.x < 0) {
-                mPosition.x    += xOverlap;
-                mVelocity.x     = 0;
- 
-                // Collision!
-                // mIsCollidingLeft = true;
-                mIsCollidingLeftEntity = true;
-            }
+                float xDistance = fabs(mPosition.x - collidableEntity->mPosition.x);
+                float xOverlap  = fabs(xDistance - (mColliderDimensions.x / 2.0f) - (collidableEntity->mColliderDimensions.x / 2.0f));
+
+                if (mVelocity.x > 0) {
+                    mPosition.x     -= xOverlap;
+                    mVelocity.x      = 0;
+
+                    // Collision!
+                    mIsCollidingRight = true;
+                    mIsCollidingRightAI = true;
+                } else if (mVelocity.x < 0) {
+                    mPosition.x    += xOverlap;
+                    mVelocity.x     = 0;
+    
+                    // Collision!
+                    mIsCollidingLeft = true;
+                    mIsCollidingLeftAI = true;
+                }
+        }
         }
     }
 }
@@ -219,10 +264,10 @@ void Entity::AIWander() {
     else if (mDirection == LEFT) moveLeft();
     else if (mDirection == RIGHT) moveRight();  
 
-    if (mIsCollidingLeftEntity || mIsCollidingLeft) {
+    if (mIsCollidingLeftAI || mIsCollidingLeft) {
         moveRight();
     }
-    else if (mIsCollidingRightEntity || mIsCollidingRight) {
+    else if (mIsCollidingRightAI || mIsCollidingRight) {
         moveLeft();
     }
    
@@ -266,7 +311,7 @@ void Entity::AIActivate(Entity *target)
 }
 
 void Entity::update(float deltaTime, Entity *player, Map *map, 
-    Entity *collidableEntities, int collisionCheckCount)
+    Entity **collidableEntities, int collisionCheckCount)
 {
     if (mEntityStatus == INACTIVE) return;
     

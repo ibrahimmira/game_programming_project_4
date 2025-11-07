@@ -43,10 +43,15 @@ private:
     bool mIsCollidingRight  = false;
     bool mIsCollidingLeft   = false;
 
-    bool mIsCollidingTopEntity    = false;
-    bool mIsCollidingBottomEntity = false;
-    bool mIsCollidingRightEntity  = false;
-    bool mIsCollidingLeftEntity   = false;
+    bool mIsCollidingTopAI    = false;
+    bool mIsCollidingBottomAI = false;
+    bool mIsCollidingRightAI  = false;
+    bool mIsCollidingLeftAI   = false;
+
+    bool mIsCollidingBottomBLOCK = false;
+    bool mIsCollidingTopBLOCK = false;
+    bool mIsCollidingLeftBLOCK = false;
+    bool mIsCollidingRightBLOCK = false;
 
     EntityStatus mEntityStatus = ACTIVE;
     EntityType   mEntityType;
@@ -56,10 +61,10 @@ private:
 
     bool isColliding(Entity *other) const;
 
-    void checkCollisionY(Entity *collidableEntities, int collisionCheckCount);
+    void checkCollisionY(Entity **collidableEntities, int collisionCheckCount);
     void checkCollisionY(Map *map);
 
-    void checkCollisionX(Entity *collidableEntities, int collisionCheckCount);
+    void checkCollisionX(Entity **collidableEntities, int collisionCheckCount);
     void checkCollisionX(Map *map);
     
     void resetColliderFlags() 
@@ -69,10 +74,15 @@ private:
         mIsCollidingRight  = false;
         mIsCollidingLeft   = false;
 
-        mIsCollidingBottomEntity = false;
-        mIsCollidingLeftEntity = false;
-        mIsCollidingRightEntity = false;
-        mIsCollidingTopEntity = false;
+        mIsCollidingBottomAI = false;
+        mIsCollidingLeftAI = false;
+        mIsCollidingRightAI = false;
+        mIsCollidingTopAI = false;
+
+        mIsCollidingBottomBLOCK = false;
+        mIsCollidingLeftBLOCK = false;
+        mIsCollidingRightBLOCK = false;
+        mIsCollidingTopBLOCK = false;
     }
 
     void animate(float deltaTime);
@@ -96,7 +106,7 @@ public:
     ~Entity();
 
     void update(float deltaTime, Entity *player, Map *map, 
-        Entity *collidableEntities, int collisionCheckCount);
+        Entity **collidableEntities, int collisionCheckCount);
     void render();
     void normaliseMovement() { Normalise(&mMovement); }
 
@@ -139,17 +149,23 @@ public:
     bool isCollidingLeft()   const { return mIsCollidingLeft; }
     bool isCollidingRight()   const { return mIsCollidingRight; }
 
-    bool isCollidingTopEntity()    const { return mIsCollidingTopEntity;    }
-    bool isCollidingBottomEntity() const { return mIsCollidingBottomEntity; }
-    bool isCollidingLeftEntity()   const { return mIsCollidingLeftEntity; }
-    bool isCollidingRightEntity()   const { return mIsCollidingRightEntity; }
+    bool isCollidingTopAI()    const { return mIsCollidingTopAI;    }
+    bool isCollidingBottomAI() const { return mIsCollidingBottomAI; }
+    bool isCollidingLeftAI()   const { return mIsCollidingLeftAI; }
+    bool isCollidingRightAI()   const { return mIsCollidingRightAI; }
 
     bool isAttackedbyAI(Entity *enemy ) const {
 
-        bool gotAttacked = mIsCollidingLeftEntity || mIsCollidingRightEntity ||
-                           enemy->isCollidingLeftEntity() || enemy->isCollidingRightEntity();
+        bool gotAttacked = mIsCollidingLeftAI || mIsCollidingRightAI ||
+                           enemy->isCollidingLeftAI() || enemy->isCollidingRightAI();
         
         return gotAttacked;
+    }
+
+    bool isCollidingBLOCK() {
+        
+        return mIsCollidingBottomBLOCK || mIsCollidingTopBLOCK 
+                || mIsCollidingLeftBLOCK || mIsCollidingRightBLOCK;
     }
 
     std::map<Direction, std::vector<int>> getAnimationAtlas() const { return mAnimationAtlas; }
