@@ -9,6 +9,10 @@ void LevelB::initialise()
 {
    mGameState.nextSceneID = -1;
 
+   mGameState.bgm = LoadMusicStream("assets/SCP-x7x.mp3");
+   SetMusicVolume(mGameState.bgm, 0.33f);
+   PlayMusicStream(mGameState.bgm);
+
    /*
       ----------- MAP -----------
    */
@@ -25,7 +29,7 @@ void LevelB::initialise()
       ----------- GOLD -----------
    */
    gold = new Entity(
-      {mOrigin.x, mGameState.map->getBottomBoundary() - 3 * (TILE_DIMENSION / 2)},
+      {mGameState.map->getRightBoundary() - (TILE_DIMENSION / 2), mOrigin.y - 6 * (TILE_DIMENSION / 2)},
       { TILE_DIMENSION, TILE_DIMENSION },
       "assets/gold.png",
       BLOCK
@@ -75,84 +79,122 @@ void LevelB::initialise()
       ----------- ENEMY AI -----------
    */
 
-    mGameState.enemyA = new Entity(
+    mGameState.enemyB = new Entity(
       {mOrigin.x - 200, mOrigin.y}, // position
       {85.0f * sizeRatio, 85.0f},             // scale
-      "assets/lightnings_enemy1.png",                   // texture file address
+      "assets/lightnings_enemyB.png",                   // texture file address
       ATLAS,                                    // single image or atlas?
       { 4, 9 },                                 // atlas dimensions
       AnimationAtlas,                    // actual atlas
       NPC                                    // entity type
    );
 
-    mGameState.enemyA->setAIType(WANDERER);
-    mGameState.enemyA->setAIState(IDLE);
-    mGameState.enemyA->setSpeed(Entity::DEFAULT_SPEED * 0.50f);
+    mGameState.enemyB->setAIType(FOLLOWER);
+    mGameState.enemyB->setAIState(IDLE);
+    mGameState.enemyB->setSpeed(Entity::DEFAULT_SPEED * 0.50f);
 
-    mGameState.enemyA->setColliderDimensions({
-      mGameState.enemyA->getScale().x / 1.5f,
-      mGameState.enemyA->getScale().y / 1.2f
+    mGameState.enemyB->setColliderDimensions({
+      mGameState.enemyB->getScale().x / 1.5f,
+      mGameState.enemyB->getScale().y / 1.2f
    });
 
-    mGameState.enemyA->setAcceleration({0.0f, ACCELERATION_OF_GRAVITY});
-    mGameState.enemyA->setDirection(RIGHT);
-    mGameState.enemyA->render();
+    mGameState.enemyB->setAcceleration({0.0f, ACCELERATION_OF_GRAVITY});
+    mGameState.enemyB->setDirection(RIGHT);
+
+    mGameState.enemyB2 = new Entity(
+      {mOrigin.x - 100, mOrigin.y - 500.0f}, // position
+      {85.0f * sizeRatio, 85.0f},             // scale
+      "assets/lightnings_enemyB.png",                   // texture file address
+      ATLAS,                                    // single image or atlas?
+      { 4, 9 },                                 // atlas dimensions
+      AnimationAtlas,                    // actual atlas
+      NPC                                    // entity type
+   );
+
+    mGameState.enemyB2->setAIType(FOLLOWER);
+    mGameState.enemyB2->setAIState(IDLE);
+    mGameState.enemyB2->setSpeed(Entity::DEFAULT_SPEED * 0.50f);
+
+    mGameState.enemyB2->setColliderDimensions({
+      mGameState.enemyB2->getScale().x / 1.5f,
+      mGameState.enemyB2->getScale().y / 1.2f
+   });
+
+    mGameState.enemyB2->setAcceleration({0.0f, ACCELERATION_OF_GRAVITY});
+    mGameState.enemyB2->setDirection(RIGHT);
+    
+
 }
 
 void LevelB::update(float deltaTime)
 {
-   // UpdateMusicStream(mGameState.bgm);
+   UpdateMusicStream(mGameState.bgm);
    if (!mGameState.displayLoserMessage) {
       
-      Entity* heroCollidableEntities[] = {mGameState.enemyA, gold};
-      Entity* enemyCollidableEntities[] = {mGameState.hero};
+    Entity* heroCollidableEntities[] = {mGameState.enemyB, mGameState.enemyB2, gold};
+    Entity* enemyCollidableEntities[] = {mGameState.hero};
 
-      mGameState.hero->update(
-         deltaTime,      // delta time / fixed timestep
-         nullptr,        // player
-         mGameState.map, // map
-         heroCollidableEntities,        // collidable entities
-         2               // col. entity count
-      );
+    mGameState.hero->update(
+        deltaTime,      // delta time / fixed timestep
+        nullptr,        // player
+        mGameState.map, // map
+        heroCollidableEntities,        // collidable entities
+        3               // col. entity count
+    );
 
-      mGameState.enemyA->update(
-         deltaTime,      // delta time / fixed timestep
-         mGameState.hero,        // player
-         mGameState.map, // map
-         enemyCollidableEntities,        // collidable entities
-         1               // col. entity count
-      );
+    mGameState.enemyB->update(
+        deltaTime,      // delta time / fixed timestep
+        mGameState.hero,        // player
+        mGameState.map, // map
+        enemyCollidableEntities,        // collidable entities
+        1               // col. entity count
+    );
 
-      if (mGameState.hero->isCollidingBLOCK()) {
-         mGameState.nextSceneID = 2;
-         return;
-      } 
+    mGameState.enemyB2->update(
+        deltaTime,      // delta time / fixed timestep
+        mGameState.hero,        // player
+        mGameState.map, // map
+        enemyCollidableEntities,        // collidable entities
+        1               // col. entity count
+    );
 
-      mGameState.damageCooldown = fmaxf(0.0f, mGameState.damageCooldown - deltaTime);
+    mGameState.damageCooldown = fmaxf(0.0f, mGameState.damageCooldown - deltaTime);
 
-      bool attacked = mGameState.hero->isAttackedbyAI(mGameState.enemyA);
+    bool attackedByB  = mGameState.hero->isAttackedbyAI(mGameState.enemyB);
+    bool attackedByB2 = mGameState.hero->isAttackedbyAI(mGameState.enemyB2);
+      
+    bool attacked = attackedByB || attackedByB2;
 
-      if (attacked && mGameState.damageCooldown <= 0.0f) {
+    if (attacked && mGameState.damageCooldown <= 0.0f) {
          mGameState.livesRemaining--;
          mGameState.damageCooldown = 1.0f;
-         mGameState.nextSceneID = 1;
+         mGameState.nextSceneID = 2;
       }
+    
 
-      bool defeatedEnemy = mGameState.hero->isCollidingBottomAI();
-      if (defeatedEnemy && mGameState.damageCooldown <= 0.0f) {
-         mGameState.enemyA->deactivate();
-      }
+    Entity *stomped = mGameState.hero->getLastNPCBottomCollision();
 
-      Vector2 currentPlayerPosition = mGameState.hero->getPosition();
+    if (stomped && mGameState.damageCooldown <= 0.0f) {
+    stomped->deactivate();
+    }
 
-      if (mGameState.hero->getPosition().y > 800.0f) {
-         mGameState.nextSceneID = 1;
-         mGameState.livesRemaining--;
-      } 
+    mGameState.hero->clearLastNPCBottomCollision();
+    
+    Vector2 currentPlayerPosition = mGameState.hero->getPosition();
 
-      panCamera(&mGameState.camera, &currentPlayerPosition);
-   }
+    if (mGameState.hero->getPosition().y > 800.0f) {
+        mGameState.nextSceneID = 2;
+        mGameState.livesRemaining--;
+    } 
 
+    panCamera(&mGameState.camera, &currentPlayerPosition);
+   
+
+    if (mGameState.hero->isCollidingBLOCK()) {
+                mGameState.nextSceneID = 3;
+                return;
+    } 
+    }
    if (mGameState.livesRemaining == 0) mGameState.displayLoserMessage = true;
 
    if (mGameState.displayLoserMessage) {
@@ -173,7 +215,8 @@ void LevelB::render()
 
    mGameState.map->render();
    mGameState.hero->render();
-   mGameState.enemyA->render();
+   mGameState.enemyB->render();
+   mGameState.enemyB2->render();
    gold->render();
 
    if (mGameState.displayLoserMessage) {
@@ -186,6 +229,9 @@ void LevelB::shutdown()
 {
    delete mGameState.map;
    delete mGameState.hero;
-   delete mGameState.enemyA;
+   delete mGameState.enemyB;
+   delete mGameState.enemyB2;
    delete gold;
+
+   UnloadMusicStream(mGameState.bgm);
 }

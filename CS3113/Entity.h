@@ -53,6 +53,8 @@ private:
     bool mIsCollidingLeftBLOCK = false;
     bool mIsCollidingRightBLOCK = false;
 
+    Entity *mLastNPCBottomCollision = nullptr;
+
     EntityStatus mEntityStatus = ACTIVE;
     EntityType   mEntityType;
 
@@ -204,6 +206,9 @@ public:
         { mAIState = newState;                     }
     void setAIType(AIType newType)
         { mAIType = newType;                       }
+
+    Entity *getLastNPCBottomCollision() const { return mLastNPCBottomCollision; }
+    void clearLastNPCBottomCollision() { mLastNPCBottomCollision = nullptr; }
 };
 
 #endif // ENTITY_CPP

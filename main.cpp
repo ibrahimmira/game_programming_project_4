@@ -32,13 +32,16 @@ void shutdown();
 
 void switchToScene(Scene *scene)
 {   
+    int carriedLives = (gCurrentScene) ? gCurrentScene->getLives() : scene->getLives();
     gCurrentScene = scene;
     gCurrentScene->initialise();
+    gCurrentScene->setLives(carriedLives);
 }
 
 void initialise()
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Scenes");
+    InitAudioDevice();
 
     gMenuScreen = new Menu(ORIGIN,"#000000ff");
 
@@ -132,6 +135,7 @@ void shutdown()
     delete gLevelA;
     for (int i = 0; i < NUMBER_OF_LEVELS; i++) gLevels[i] = nullptr;
 
+    CloseAudioDevice();
     CloseWindow();
 }
 

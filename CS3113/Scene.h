@@ -9,9 +9,10 @@ struct GameState
     Entity *hero;
     Entity *enemyA;
     Entity *enemyB;
+    Entity *enemyB2;
     Entity *enemyC;
 
-    // Music bgm;
+    Music bgm;
     // Sound jumpSound;
 
     Camera2D camera;
@@ -44,6 +45,9 @@ public:
     GameState   getState()           const { return mGameState; }
     Vector2     getOrigin()          const { return mOrigin;    }
     const char* getBGColourHexCode() const { return mBGColourHexCode; }
+
+    void setLives(int lives) { mGameState.livesRemaining = lives; }
+    int  getLives() const    { return mGameState.livesRemaining; }
 };
 
 #endif

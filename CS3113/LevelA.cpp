@@ -9,6 +9,10 @@ void LevelA::initialise()
 {
    mGameState.nextSceneID = -1;
 
+   mGameState.bgm = LoadMusicStream("assets/Mountain Emperor.mp3");
+   SetMusicVolume(mGameState.bgm, 0.33f);
+   PlayMusicStream(mGameState.bgm);
+
    /*
       ----------- MAP -----------
    */
@@ -78,7 +82,7 @@ void LevelA::initialise()
     mGameState.enemyA = new Entity(
       {mOrigin.x - 200, mOrigin.y}, // position
       {85.0f * sizeRatio, 85.0f},             // scale
-      "assets/lightnings_enemy1.png",                   // texture file address
+      "assets/lightnings_enemyA.png",                   // texture file address
       ATLAS,                                    // single image or atlas?
       { 4, 9 },                                 // atlas dimensions
       AnimationAtlas,                    // actual atlas
@@ -96,12 +100,12 @@ void LevelA::initialise()
 
     mGameState.enemyA->setAcceleration({0.0f, ACCELERATION_OF_GRAVITY});
     mGameState.enemyA->setDirection(RIGHT);
-    mGameState.enemyA->render();
+    // mGameState.enemyA->render();
 }
 
 void LevelA::update(float deltaTime)
 {
-   // UpdateMusicStream(mGameState.bgm);
+   UpdateMusicStream(mGameState.bgm);
    if (!mGameState.displayLoserMessage) {
       
       Entity* heroCollidableEntities[] = {mGameState.enemyA, gold};
@@ -122,11 +126,6 @@ void LevelA::update(float deltaTime)
          enemyCollidableEntities,        // collidable entities
          1               // col. entity count
       );
-
-      if (mGameState.hero->isCollidingBLOCK()) {
-         mGameState.nextSceneID = 2;
-         return;
-      } 
 
       mGameState.damageCooldown = fmaxf(0.0f, mGameState.damageCooldown - deltaTime);
 
@@ -151,6 +150,11 @@ void LevelA::update(float deltaTime)
       } 
 
       panCamera(&mGameState.camera, &currentPlayerPosition);
+
+      if (mGameState.hero->isCollidingBLOCK()) {
+         mGameState.nextSceneID = 2;
+         return;
+      } 
    }
 
    if (mGameState.livesRemaining == 0) mGameState.displayLoserMessage = true;
@@ -188,4 +192,6 @@ void LevelA::shutdown()
    delete mGameState.hero;
    delete mGameState.enemyA;
    delete gold;
+
+   UnloadMusicStream(mGameState.bgm);
 }

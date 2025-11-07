@@ -77,6 +77,7 @@ void Entity::checkCollisionY(Entity **collidableEntities, int collisionCheckCoun
                     mVelocity.y  = 0;
                     mIsCollidingBottom = true;
                     mIsCollidingBottomAI = true;
+                    mLastNPCBottomCollision = collidableEntity;
                 } else if (mVelocity.y < 0) 
                 {
                     mPosition.y += yOverlap;
@@ -397,7 +398,7 @@ void Entity::render()
         mAngle, WHITE
     );
 
-    // displayCollider();
+    displayCollider();
 }
 
 void Entity::displayCollider() 
