@@ -86,7 +86,6 @@ public:
     static constexpr int   DEFAULT_FRAME_SPEED   = 14;
     static constexpr float Y_COLLISION_THRESHOLD = 0.5f;
 
-
     Entity();
     Entity(Vector2 position, Vector2 scale, const char *textureFilepath, 
         EntityType entityType);
