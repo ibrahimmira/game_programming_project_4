@@ -7,7 +7,7 @@ Menu::~Menu() { shutdown(); }
 
 void Menu::initialise()
 {
-    mGameState.nextSceneID = 0;
+    mGameState.nextSceneID = -1;
 
     /*
       ----------- CAMERA -----------
@@ -29,7 +29,10 @@ void Menu::update(float deltaTime)
    // DrawText(TextFormat("Press enter to start"), mOrigin.x, mOrigin.y, 50, WHITE);
    // printf("Menu's DrawText got called!\n");
 
-   if (mCondition) mGameState.nextSceneID = 1;
+   if (mCondition) {
+      mGameState.nextSceneID = 1;
+      mCondition = false;
+   }
 }
 
 void Menu::render()

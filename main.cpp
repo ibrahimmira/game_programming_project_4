@@ -69,21 +69,21 @@ void processInput()
         if (IsKeyPressed(KEY_ENTER)) gMenuScreen->setGameCondition();
     }
     if (gCurrentScene != gMenuScreen) {
-        gCurrentScene->getState().chars->resetMovement();
+        gCurrentScene->getState().hero->resetMovement();
 
         
-        if      (IsKeyDown(KEY_A)) gCurrentScene->getState().chars->moveLeft();
-        else if (IsKeyDown(KEY_D)) gCurrentScene->getState().chars->moveRight();
+        if      (IsKeyDown(KEY_A)) gCurrentScene->getState().hero->moveLeft();
+        else if (IsKeyDown(KEY_D)) gCurrentScene->getState().hero->moveRight();
 
         if (IsKeyPressed(KEY_W) && 
-            gCurrentScene->getState().chars->isCollidingBottom())
+            gCurrentScene->getState().hero->isCollidingBottom())
         {
-            gCurrentScene->getState().chars->jump();
+            gCurrentScene->getState().hero->jump();
             // PlaySound(gCurrentScene->getState().jumpSound);
         }
 
-        if (GetLength(gCurrentScene->getState().chars->getMovement()) > 1.0f) 
-            gCurrentScene->getState().chars->normaliseMovement();
+        if (GetLength(gCurrentScene->getState().hero->getMovement()) > 1.0f) 
+            gCurrentScene->getState().hero->normaliseMovement();
     }
     if (IsKeyPressed(KEY_Q) || WindowShouldClose()) gAppStatus = TERMINATED;
 }
@@ -141,7 +141,7 @@ int main(void)
         processInput();
         update();
 
-        if (gCurrentScene->getState().nextSceneID > 0)
+        if (gCurrentScene->getState().nextSceneID >= 0)
         {
             int id = gCurrentScene->getState().nextSceneID;
             switchToScene(gLevels[id]);

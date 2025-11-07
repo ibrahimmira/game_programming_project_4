@@ -7,7 +7,7 @@ LevelA::~LevelA() { shutdown(); }
 
 void LevelA::initialise()
 {
-   mGameState.nextSceneID = 0;
+   mGameState.nextSceneID = -1;
 
    /*
       ----------- MAP -----------
@@ -92,44 +92,57 @@ void LevelA::initialise()
 void LevelA::update(float deltaTime)
 {
    // UpdateMusicStream(mGameState.bgm);
+   if (!mGameState.displayLoserMessage) {
+      
+      mGameState.hero->update(
+         deltaTime,      // delta time / fixed timestep
+         nullptr,        // player
+         mGameState.map, // map
+         mGameState.enemyA,        // collidable entities
+         1               // col. entity count
+      );
 
-   mGameState.hero->update(
-      deltaTime,      // delta time / fixed timestep
-      nullptr,        // player
-      mGameState.map, // map
-      mGameState.enemyA,        // collidable entities
-      1               // col. entity count
-   );
+      mGameState.enemyA->update(
+         deltaTime,      // delta time / fixed timestep
+         mGameState.hero,        // player
+         mGameState.map, // map
+         mGameState.hero,        // collidable entities
+         1               // col. entity count
+      );
 
-   mGameState.enemyA->update(
-      deltaTime,      // delta time / fixed timestep
-      mGameState.hero,        // player
-      mGameState.map, // map
-      mGameState.hero,        // collidable entities
-      1               // col. entity count
-   );
+      mGameState.damageCooldown = fmaxf(0.0f, mGameState.damageCooldown - deltaTime);
 
-   mGameState.damageCooldown = fmaxf(0.0f, mGameState.damageCooldown - deltaTime);
+      bool attacked = mGameState.hero->isAttackedbyAI(mGameState.enemyA);
 
-   bool attacked = mGameState.hero->isAttackedbyAI(mGameState.enemyA);
+      if (attacked && mGameState.damageCooldown <= 0.0f) {
+         mGameState.livesRemaining--;
+         mGameState.damageCooldown = 1.0f;
+         mGameState.nextSceneID = 1;
+      }
 
-   if (attacked && mGameState.damageCooldown <= 0.0f) {
-      mGameState.livesRemaining--;
-      mGameState.damageCooldown = 1.0f;
-      mGameState.nextSceneID = 1;
+      bool defeatedEnemy = mGameState.hero->isCollidingBottomEntity();
+      if (defeatedEnemy && mGameState.damageCooldown <= 0.0f) {
+         mGameState.enemyA->deactivate();
+      }
+
+      Vector2 currentPlayerPosition = mGameState.hero->getPosition();
+
+      if (mGameState.hero->getPosition().y > 800.0f) mGameState.nextSceneID = 1;
+
+      panCamera(&mGameState.camera, &currentPlayerPosition);
    }
 
-   bool defeatedEnemy = mGameState.hero->isCollidingBottomEntity();
-   if (defeatedEnemy && mGameState.damageCooldown <= 0.0f) {
-      mGameState.enemyA->deactivate();
+   if (mGameState.livesRemaining == 0) mGameState.displayLoserMessage = true;
+
+   if (mGameState.displayLoserMessage) {
+      mGameState.displayMessageTimer -= deltaTime;
    }
-
-   // Vector2 currentPlayerPosition = { mGameState.chars->getPosition().x, mOrigin.y };
-   Vector2 currentPlayerPosition = mGameState.hero->getPosition();
-
-   if (mGameState.hero->getPosition().y > 800.0f) mGameState.nextSceneID = 1;
-
-   panCamera(&mGameState.camera, &currentPlayerPosition);
+   if (mGameState.displayMessageTimer <= 0) {
+      mGameState.livesRemaining = 3;
+      mGameState.displayLoserMessage = false;
+      mGameState.displayMessageTimer = 3.0f;
+      mGameState.nextSceneID = 0;
+   } 
   
 }
 
@@ -137,11 +150,15 @@ void LevelA::render()
 {
    ClearBackground(ColorFromHex(mBGColourHexCode));
 
-   
    mGameState.map->render();
    mGameState.hero->render();
    mGameState.enemyA->render();
+
+   if (mGameState.displayLoserMessage) {
+    DrawText("You Lose!", mOrigin.x - 80, mOrigin.y, 40, RED);
+   }
 }
+
 
 void LevelA::shutdown()
 {

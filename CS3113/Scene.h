@@ -16,9 +16,13 @@ struct GameState
 
     Camera2D camera;
 
-    int nextSceneID;
+    int nextSceneID = -1;
     int livesRemaining = 3;
     float damageCooldown = 0.0f;
+
+    bool displayLoserMessage = false;
+    bool displayWinnerMessage = false;
+    float displayMessageTimer = 3.0f;
 };
 
 class Scene 
