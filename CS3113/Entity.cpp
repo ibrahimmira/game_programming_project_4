@@ -257,8 +257,6 @@ void Entity::animate(float deltaTime)
     }
 }
 
-// void Entity::AIWander() { moveLeft(); }
-
 void Entity::AIWander() { 
 
     if (mDirection != LEFT && mDirection != RIGHT) moveLeft();
@@ -272,6 +270,18 @@ void Entity::AIWander() {
         moveLeft();
     }
    
+}
+
+void Entity::AIFLY() { 
+    
+    float time = GetTime() * 1.8f;       
+    float horizontal = sinf(time) * 300.0f;
+    float vertical   = cosf(time * 1.3f) * 150.0f;
+
+    mPosition.x = mHomePosition.x + horizontal;
+    mPosition.y = mHomePosition.y - 200.0f + vertical; 
+    mVelocity   = { 0.0f, 0.0f };              
+       
 }
 
 void Entity::AIFollow(Entity *target)
@@ -306,6 +316,10 @@ void Entity::AIActivate(Entity *target)
         AIFollow(target);
         break;
     
+    case FLYER:
+        AIFLY();
+        break;
+    
     default:
         break;
     }
@@ -337,11 +351,11 @@ void Entity::update(float deltaTime, Entity *player, Map *map,
 
     mPosition.y += mVelocity.y * deltaTime;
     checkCollisionY(collidableEntities, collisionCheckCount);
-    checkCollisionY(map);
+    if (mAIType != FLYER) checkCollisionY(map);
 
     mPosition.x += mVelocity.x * deltaTime;
     checkCollisionX(collidableEntities, collisionCheckCount);
-    checkCollisionX(map);
+    if (mAIType != FLYER) checkCollisionX(map);
 
     if (mTextureType == ATLAS && GetLength(mMovement) != 0 && mIsCollidingBottom) 
         animate(deltaTime);
@@ -398,7 +412,7 @@ void Entity::render()
         mAngle, WHITE
     );
 
-    displayCollider();
+    // displayCollider();
 }
 
 void Entity::displayCollider() 

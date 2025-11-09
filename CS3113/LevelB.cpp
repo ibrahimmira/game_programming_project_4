@@ -13,6 +13,12 @@ void LevelB::initialise()
    SetMusicVolume(mGameState.bgm, 0.33f);
    PlayMusicStream(mGameState.bgm);
 
+   mGameState.jumpSound = LoadSound("assets/jump.wav");
+   mGameState.gameOver= LoadSound("assets/game_over.mp3");
+   mGameState.lifeLost = LoadSound("assets/life_lost.mp3");
+   mGameState.levelWin = LoadSound("assets/win_level.mp3");
+
+
    /*
       ----------- MAP -----------
    */
@@ -51,7 +57,7 @@ void LevelB::initialise()
    mGameState.hero = new Entity(
       {mOrigin.x, mOrigin.y}, // position
       {85.0f * sizeRatio, 85.0f},             // scale
-      "assets/lightning.png",                   // texture file address
+      "assets/hero.png",                   // texture file address
       ATLAS,                                    // single image or atlas?
       { 4, 9 },                                 // atlas dimensions
       AnimationAtlas,                    // actual atlas
@@ -82,7 +88,7 @@ void LevelB::initialise()
     mGameState.enemyB = new Entity(
       {mOrigin.x - 200, mOrigin.y}, // position
       {85.0f * sizeRatio, 85.0f},             // scale
-      "assets/lightnings_enemyB.png",                   // texture file address
+      "assets/heros_enemyB.png",                   // texture file address
       ATLAS,                                    // single image or atlas?
       { 4, 9 },                                 // atlas dimensions
       AnimationAtlas,                    // actual atlas
@@ -104,7 +110,7 @@ void LevelB::initialise()
     mGameState.enemyB2 = new Entity(
       {mOrigin.x - 100, mOrigin.y - 500.0f}, // position
       {85.0f * sizeRatio, 85.0f},             // scale
-      "assets/lightnings_enemyB.png",                   // texture file address
+      "assets/heros_enemyB.png",                   // texture file address
       ATLAS,                                    // single image or atlas?
       { 4, 9 },                                 // atlas dimensions
       AnimationAtlas,                    // actual atlas
@@ -158,6 +164,12 @@ void LevelB::update(float deltaTime)
         1               // col. entity count
     );
 
+    if (mGameState.hero->isCollidingBLOCK()) {
+                mGameState.nextSceneID = 3;
+                PlaySound(mGameState.levelWin);
+                return;
+    } 
+
     mGameState.damageCooldown = fmaxf(0.0f, mGameState.damageCooldown - deltaTime);
 
     bool attackedByB  = mGameState.hero->isAttackedbyAI(mGameState.enemyB);
@@ -167,6 +179,7 @@ void LevelB::update(float deltaTime)
 
     if (attacked && mGameState.damageCooldown <= 0.0f) {
          mGameState.livesRemaining--;
+         PlaySound(mGameState.lifeLost);
          mGameState.damageCooldown = 1.0f;
          mGameState.nextSceneID = 2;
       }
@@ -188,14 +201,13 @@ void LevelB::update(float deltaTime)
     } 
 
     panCamera(&mGameState.camera, &currentPlayerPosition);
-   
 
-    if (mGameState.hero->isCollidingBLOCK()) {
-                mGameState.nextSceneID = 3;
-                return;
-    } 
     }
-   if (mGameState.livesRemaining == 0) mGameState.displayLoserMessage = true;
+    
+   if (mGameState.livesRemaining == 0) {
+    mGameState.displayLoserMessage = true;
+    PlaySound(mGameState.gameOver);
+   }
 
    if (mGameState.displayLoserMessage) {
       mGameState.displayMessageTimer -= deltaTime;
@@ -234,4 +246,9 @@ void LevelB::shutdown()
    delete gold;
 
    UnloadMusicStream(mGameState.bgm);
+
+   UnloadSound(mGameState.jumpSound);
+   UnloadSound(mGameState.levelWin);
+   UnloadSound(mGameState.gameOver);
+   UnloadSound(mGameState.lifeLost);
 }

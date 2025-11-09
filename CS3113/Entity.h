@@ -6,7 +6,7 @@
 enum Direction    { LEFT, UP, RIGHT, DOWN              }; // For walking
 enum EntityStatus { ACTIVE, INACTIVE                   };
 enum EntityType   { PLAYER, BLOCK, PLATFORM, NPC, NONE };
-enum AIType       { WANDERER, FOLLOWER                 };
+enum AIType       { WANDERER, FOLLOWER, FLYER                 };
 enum AIState      { WALKING, IDLE, FOLLOWING           };
 
 class Entity
@@ -55,6 +55,11 @@ private:
 
     Entity *mLastNPCBottomCollision = nullptr;
 
+    Vector2 mHomePosition;   
+    float   mBaseAltitude;   
+
+    float mFlyHeadingTimer = 0.0f;
+
     EntityStatus mEntityStatus = ACTIVE;
     EntityType   mEntityType;
 
@@ -91,6 +96,7 @@ private:
     void AIActivate(Entity *target);
     void AIWander();
     void AIFollow(Entity *target);
+    void AIFLY();
 
 public:
     static constexpr int   DEFAULT_SIZE          = 250;
@@ -209,6 +215,12 @@ public:
 
     Entity *getLastNPCBottomCollision() const { return mLastNPCBottomCollision; }
     void clearLastNPCBottomCollision() { mLastNPCBottomCollision = nullptr; }
+
+    void setHomePosition(Vector2 pos) { mHomePosition = pos; }
+    Vector2 getHomePosition() const { return mHomePosition; }
+
+    void setBaseAltitude(float baseAltitude) { mBaseAltitude = baseAltitude; }
+    float getBaseAltitude() const { return mBaseAltitude; }
 };
 
 #endif // ENTITY_CPP
