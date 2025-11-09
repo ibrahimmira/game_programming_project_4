@@ -23,11 +23,6 @@ void Menu::initialise()
 
 void Menu::update(float deltaTime)
 {
-   // UpdateMusicStream(mGameState.bgm);
-   // printf("Menu's update got called!\n");
-   // DrawText(TextFormat("Press enter to start"), 1500 - 300, 50, 20, WHITE);
-   // DrawText(TextFormat("Press enter to start"), mOrigin.x, mOrigin.y, 50, WHITE);
-   // printf("Menu's DrawText got called!\n");
 
    if (mCondition) {
       mGameState.nextSceneID = 1;
@@ -38,7 +33,7 @@ void Menu::update(float deltaTime)
 void Menu::render()
 {
    ClearBackground(ColorFromHex(mBGColourHexCode));
-   DrawText(TextFormat("IbraGame"), mOrigin.x - 90, mOrigin.y - 70, 40, WHITE);
+   DrawText(TextFormat("Golden Adventure"), mOrigin.x - 165, mOrigin.y - 70, 40, WHITE);
    DrawText(TextFormat("Press enter to start"), mOrigin.x - 150, mOrigin.y + 50, 30, WHITE);
 }
 
