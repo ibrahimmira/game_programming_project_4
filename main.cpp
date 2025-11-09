@@ -1,4 +1,4 @@
-#include "LevelB.h"
+#include "LevelC.h"
 
 // Global Constants
 constexpr int SCREEN_WIDTH     = 1000,
@@ -20,6 +20,7 @@ std::vector<Scene*> gLevels = {};
 
 LevelA *gLevelA = nullptr;
 LevelB *gLevelB = nullptr;
+LevelC *gLevelC = nullptr;
 Menu *gMenuScreen = nullptr;
 
 // Function Declarations
@@ -45,31 +46,24 @@ void initialise()
 
     gMenuScreen = new Menu(ORIGIN,"#000000ff");
 
-    //printf("I reached post menu init !!!!!!!!\n");
-
     gLevelA = new LevelA(ORIGIN, "#b1eafaff");
     gLevelB = new LevelB(ORIGIN, "#ffddb3ff");
+    gLevelC = new LevelC(ORIGIN, "#9d8cfdff");
 
     gLevels.push_back(gMenuScreen);
     gLevels.push_back(gLevelA);
     gLevels.push_back(gLevelB);
-
-    //printf("I reached most menu push back!!!!!!!!\n");
+    gLevels.push_back(gLevelC);
 
     switchToScene(gLevels[0]);
 
-    //printf("I reached post switchtoscene!!!!!!!!\n");
-
     SetTargetFPS(FPS);
 
-    //printf("I reached post settargetfps!!!!!!!\n");
 }
 
 void processInput() 
 {
-    // printf("I reached process input!!!!!!!!");
 
-    // if (IsKeyPressed(KEY_ENTER)) gMenuScreen->
     if (gCurrentScene == gMenuScreen) {
 
         if (IsKeyPressed(KEY_ENTER)) gMenuScreen->setGameCondition();
@@ -85,7 +79,7 @@ void processInput()
             gCurrentScene->getState().hero->isCollidingBottom())
         {
             gCurrentScene->getState().hero->jump();
-            // PlaySound(gCurrentScene->getState().jumpSound);
+            PlaySound(gCurrentScene->getState().jumpSound);
         }
 
         if (GetLength(gCurrentScene->getState().hero->getMovement()) > 1.0f) 
