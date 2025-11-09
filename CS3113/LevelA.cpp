@@ -105,7 +105,7 @@ void LevelA::initialise()
 
     mGameState.enemyA->setAcceleration({0.0f, ACCELERATION_OF_GRAVITY});
     mGameState.enemyA->setDirection(RIGHT);
-    // mGameState.enemyA->render();
+    
 }
 
 void LevelA::update(float deltaTime)

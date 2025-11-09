@@ -40,5 +40,5 @@
 # debug information files
 *.dwo
 
-raylib_app
+
 .DS_Store

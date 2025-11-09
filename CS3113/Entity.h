@@ -58,8 +58,6 @@ private:
     Vector2 mHomePosition;   
     float   mBaseAltitude;   
 
-    float mFlyHeadingTimer = 0.0f;
-
     EntityStatus mEntityStatus = ACTIVE;
     EntityType   mEntityType;
 

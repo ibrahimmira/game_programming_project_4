@@ -1,6 +1,5 @@
 #include "Scene.h"
 
-
 class Menu : public Scene {
 private:
     bool mCondition = false;

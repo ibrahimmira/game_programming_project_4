@@ -1,8 +1,5 @@
 #include "LevelA.h"
 
-// constexpr int LEVEL_WIDTH = 16,
-//               LEVEL_HEIGHT = 9;
-
 class LevelB : public Scene {
 private:
     unsigned int mLevelData[LEVEL_WIDTH * LEVEL_HEIGHT] = {

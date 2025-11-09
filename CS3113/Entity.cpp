@@ -49,6 +49,7 @@ void Entity::checkCollisionY(Entity **collidableEntities, int collisionCheckCoun
                         mPosition.y -= yOverlap;
                         mVelocity.y  = 0;
                         mIsCollidingBottomBLOCK = true;
+                        
                     } else if (mVelocity.y < 0) 
                     {
                         mPosition.y += yOverlap;
