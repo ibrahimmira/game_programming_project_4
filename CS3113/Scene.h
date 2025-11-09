@@ -13,7 +13,11 @@ struct GameState
     Entity *enemyC;
 
     Music bgm;
-    // Sound jumpSound;
+    Sound jumpSound;
+    Sound gameWin;
+    Sound gameOver;
+    Sound levelWin;
+    Sound lifeLost;
 
     Camera2D camera;
 
